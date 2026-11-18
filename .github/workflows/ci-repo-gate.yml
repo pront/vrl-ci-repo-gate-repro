@@ -1,24 +1,21 @@
 name: CI Repository Gate
-
-on:
+'on':
   workflow_call:
     inputs:
       upstream-only:
         description: Restrict this workflow to the upstream repository.
         type: boolean
         default: false
-
 permissions: {}
-
-# Skipping this job also skips the caller and its dependent jobs.
-# Jobs using always() must handle a skipped gate explicitly.
 jobs:
   repo-gate:
-    if: >-
-      github.repository == 'vectordotdev/vrl' ||
-      (!inputs.upstream-only && github.event_name != 'push')
+    if: github.repository == 'pront/vrl-ci-repo-gate-repro' || (!inputs.upstream-only && github.event_name != 'push')
     runs-on: ubuntu-latest
     timeout-minutes: 1
     steps:
-      - name: Allow dependent jobs
-        run: "true"
+    - name: Inject a failure in the Test Suite gate
+      env:
+        WORKFLOW_NAME: ${{ github.workflow }}
+        FAIL_TEST_GATE: ${{ vars.REPRO_GATE_FAIL }}
+      run: "printf \"workflow=%s gate_failure=%s\\n\" \"$WORKFLOW_NAME\" \"$FAIL_TEST_GATE\"\nif [ \"$WORKFLOW_NAME\"\
+        \ = \"Test Suite\" ] && [ \"$FAIL_TEST_GATE\" = \"true\" ]; then\n  exit 1\nfi\ntrue\n"
