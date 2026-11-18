@@ -1,0 +1,1 @@
+Runner control: keep both matrix values and all required check names, run no-ops on Ubuntu, then fail the gate on a rerun at the same SHA.
